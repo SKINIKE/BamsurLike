@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -24,12 +25,16 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        if (!GameManager.instance.isLive) { return; }
+
         inputVec.x = Input.GetAxisRaw("Horizontal");
         inputVec.y = Input.GetAxisRaw("Vertical");
     }
 
     void FixedUpdate()
     {
+        if (!GameManager.instance.isLive) { return; }
+
         ////1. 힘을 준다.
         //rigid.AddForce(inputVec);
 
@@ -43,6 +48,8 @@ public class Player : MonoBehaviour
 
     void LateUpdate()
     {
+        if (!GameManager.instance.isLive) { return; }
+
         anim.SetFloat("Speed", inputVec.magnitude);
 
         if(inputVec.x != 0)
