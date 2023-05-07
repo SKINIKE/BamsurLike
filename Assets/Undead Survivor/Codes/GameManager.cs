@@ -42,6 +42,9 @@ public class GameManager : MonoBehaviour
         //임시스크립트
         uiLevelUp.Select(playerId % 2);
         Resume();
+
+        AudioManager.instance.PlayBgm(true);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Select);
     }
 
     public void GameOver()
@@ -59,8 +62,10 @@ public class GameManager : MonoBehaviour
         uiResult.Lose();
 
         Stop();
-    }
 
+        AudioManager.instance.PlayBgm(false);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Lose);
+    }
 
     public void GameVictory()
     {
@@ -78,6 +83,9 @@ public class GameManager : MonoBehaviour
         uiResult.Win();
 
         Stop();
+
+        AudioManager.instance.PlayBgm(false);
+        AudioManager.instance.PlaySfx(AudioManager.Sfx.Win);
     }
 
     public void GameRetry()
