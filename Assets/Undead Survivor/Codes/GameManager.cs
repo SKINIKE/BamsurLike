@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -27,6 +30,9 @@ public class GameManager : MonoBehaviour
     public LevelUp uiLevelUp;
     public Result uiResult;
     public GameObject enemyCleaner;
+
+    //랭크서버로 보낼 유저이름
+    String rankUserName;
 
     void Awake()
     {
@@ -86,6 +92,55 @@ public class GameManager : MonoBehaviour
 
         AudioManager.instance.PlayBgm(false);
         AudioManager.instance.PlaySfx(AudioManager.Sfx.Win);
+    }
+
+    public void RankSave()
+    {
+        rankUserName = uiResult.gameObject.transform.Find("RankUserName").Find("UserName").GetComponent<Text>().text;
+
+        if(rankUserName == "")
+        {
+            uiResult.gameObject.transform.Find("RankUserName").Find("Placeholder").GetComponent<Text>().text = "이름을 작성해주세요.";
+        }
+        else
+        {
+            StartCoroutine(RankSaveRoutaine());
+        }
+    }
+
+    IEnumerator RankSaveRoutaine()
+    {
+        string url = "https://gamehub.dait.co.kr/api/play";
+        WWWForm form = new WWWForm();
+        string gameId = "3";
+        string gameApikey = "a2b9738f6dca5ebae83f2d8bff9f070396cee8d631f0f123ab309a055234577144bf2e038ef9886284035b93cfbec5c07cb6383914988191376b7710ff41a05d";
+        string guid = Guid.NewGuid().ToString();
+
+        form.AddField("gameId", gameId);
+        form.AddField("gameApikey", gameApikey);
+        form.AddField("playerName", rankUserName);
+        form.AddField("playerComment", "테스트");
+        form.AddField("playScore", Math.Floor(kill * (health / maxHealth)).ToString());
+        form.AddField("playUuid", guid);
+        form.AddField("etcText", "etc 테스트");
+        using UnityWebRequest www = UnityWebRequest.Post(url, form);  // 보낼 주소와 데이터 입력
+
+        yield return www.SendWebRequest();  // 응답 대기
+
+        if (www.error == null)
+        {
+            Debug.Log(www.downloadHandler.text);    // 데이터 출력
+            uiResult.gameObject.transform.Find("RankUserName").Find("UserName").gameObject.SetActive(false);
+            uiResult.gameObject.transform.Find("RankUserName").Find("Done").gameObject.SetActive(true);
+            uiResult.gameObject.transform.Find("Rank").gameObject.SetActive(false);
+            uiResult.gameObject.transform.Find("Retry").localPosition = new Vector3(0, -40, 0);
+        }
+        else
+        {
+            Debug.Log("error");
+        }
+
+        www.Dispose();
     }
 
     public void GameRetry()
